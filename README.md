@@ -60,7 +60,8 @@ Things to try:
 - [sentry.client.config.ts](sentry.client.config.ts): browser SDK (tracing, replay, feedback). `PUBLIC_*` env vars
   are inlined at **build** time.
 - [sentry.server.config.ts](sentry.server.config.ts): Node SDK. Reads `process.env` at **runtime**.
-- Source maps upload during `npm run build` when `SENTRY_AUTH_TOKEN`/`SENTRY_ORG`/`SENTRY_PROJECT` are set.
+- Source maps upload during `npm run build` when `SENTRY_AUTH_TOKEN`/`SENTRY_ORG`/`SENTRY_PROJECT` are set in `.env`
+  (read in `astro.config.mjs` via `loadEnv`). Maps are deleted from `dist/` after upload.
 
 ### Known gaps
 

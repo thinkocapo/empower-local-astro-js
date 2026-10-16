@@ -1,0 +1,17 @@
+---
+// ON-DEMAND (SSR). No `prerender` export, so with output: 'server' this runs on
+// every request. The Sentry middleware wraps it in an http.server span, and the
+// mocked queries below nest under it.
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { getProducts } from '../../lib/db';
+
+const products = await getProducts();
+---
+
+<Layout title="Products">
+  <h1>Products</h1>
+  <div class="grid">
+    {products.map((p) => <ProductCard product={p} reviewCount={p.reviews.length} />)}
+  </div>
+</Layout>

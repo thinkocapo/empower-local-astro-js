@@ -1,0 +1,26 @@
+---
+// ON-DEMAND (SSR), dynamic route. Sentry names the span by the route pattern
+// (GET /products/[id]) so all products group into one transaction.
+import Layout from '../../layouts/Layout.astro';
+import AddToCart from '../../components/AddToCart.tsx';
+import { getProduct } from '../../lib/db';
+
+const product = await getProduct(Number(Astro.params.id));
+if (!product) return new Response('Not found', { status: 404 });
+---
+
+<Layout title={product.title}>
+  <article class="product">
+    <img src={product.img} alt={product.title} />
+    <div>
+      <h1>{product.title}</h1>
+      <p>{product.descriptionfull}</p>
+      <p class="price">${product.price}</p>
+      <AddToCart client:visible id={product.id} title={product.title} price={product.price} img={product.imgcropped} />
+      <h2>Reviews</h2>
+      <ul class="reviews">
+        {product.reviews.map((r) => <li>{'★'.repeat(r.rating)} {r.description} <span class="muted">({r.created})</span></li>)}
+      </ul>
+    </div>
+  </article>
+</Layout>

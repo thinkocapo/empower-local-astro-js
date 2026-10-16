@@ -1,0 +1,8 @@
+---
+// ON-DEMAND page that fails while rendering, to show an SSR error in Sentry.
+import Layout from '../layouts/Layout.astro';
+
+throw new Error('SSR render failed: plant sensor offline');
+---
+
+<Layout title="Broken"><p>You should never see this.</p></Layout>

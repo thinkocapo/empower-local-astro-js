@@ -1,0 +1,51 @@
+---
+import CartBadge from '../components/CartBadge.tsx';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+
+// Astro.isPrerendered is true while the page is being rendered at BUILD time.
+// The timestamp below is baked into the HTML then — reload a prerendered page
+// and it never changes; reload an on-demand page and it updates every time.
+const mode = Astro.isPrerendered ? 'build' : 'request';
+const renderedAt = new Date().toISOString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{title} · Empower Plant (Astro)</title>
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="/" class="brand">Empower Plant</a>
+      <div class="links">
+        <a href="/products">Products</a>
+        <a href="/about">About</a>
+        <a href="/cart">Cart <CartBadge client:load /></a>
+      </div>
+    </nav>
+
+    <div class={`render-banner ${mode}`}>
+      {
+        mode === 'build' ? (
+          <>Prerendered at <strong>build time</strong> · {renderedAt} · served as a static .html file</>
+        ) : (
+          <>Rendered on <strong>request</strong> (SSR) · {renderedAt} · traced by the Sentry server SDK</>
+        )
+      }
+    </div>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="footer">Empower Plant — Astro edition. Mocked data, real Sentry telemetry.</footer>
+  </body>
+</html>

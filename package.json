@@ -1,0 +1,20 @@
+{
+  "name": "empower-astro",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node --env-file-if-exists=.env ./dist/server/entry.mjs",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.8",
+    "@astrojs/react": "^7.1.0",
+    "@sentry/astro": "^11.8.0",
+    "astro": "^7.4.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

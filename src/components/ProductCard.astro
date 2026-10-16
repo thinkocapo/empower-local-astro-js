@@ -1,0 +1,19 @@
+---
+// Plain Astro component: zero client JS. It renders wherever its parent page
+// renders — at build time inside a prerendered page, per request inside an SSR page.
+import type { Product } from '../lib/data';
+interface Props {
+  product: Product;
+  reviewCount?: number;
+}
+const { product, reviewCount } = Astro.props;
+---
+
+<a class="card" href={`/products/${product.id}`}>
+  <img src={product.imgcropped} alt={product.title} loading="lazy" />
+  <div class="card-body">
+    <h3>{product.title}</h3>
+    <p>{product.description}</p>
+    <p class="price">${product.price}{reviewCount !== undefined && <span class="muted"> · {reviewCount} reviews</span>}</p>
+  </div>
+</a>

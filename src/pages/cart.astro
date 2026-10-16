@@ -1,0 +1,15 @@
+---
+// PRERENDERED shell. The cart itself is client:only, so nothing about it is
+// rendered on the server or at build time.
+export const prerender = true;
+
+import Layout from '../layouts/Layout.astro';
+import Cart from '../components/Cart.tsx';
+---
+
+<Layout title="Cart">
+  <h1>Cart</h1>
+  <Cart client:only="react">
+    <p slot="fallback" class="muted">Loading cart…</p>
+  </Cart>
+</Layout>

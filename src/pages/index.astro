@@ -1,0 +1,33 @@
+---
+// PRERENDERED at build time. The hero and featured cards are static HTML.
+// The live-inventory box is a server island, fetched per request after load.
+export const prerender = true;
+
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import StockLevel from '../components/StockLevel.astro';
+import { PRODUCTS } from '../lib/data';
+---
+
+<Layout title="Home">
+  <section class="hero">
+    <h1>Empower your plants</h1>
+    <p>Smart devices that help your plants tell you what they need.</p>
+    <a class="btn" href="/products">Shop now</a>
+  </section>
+
+  <section class="split">
+    <div>
+      <h2>Featured</h2>
+      <div class="grid">
+        {PRODUCTS.slice(0, 2).map((p) => <ProductCard product={p} />)}
+      </div>
+    </div>
+    <aside class="panel">
+      <h2>In stock right now</h2>
+      <StockLevel server:defer>
+        <p slot="fallback" class="muted">Checking inventory…</p>
+      </StockLevel>
+    </aside>
+  </section>
+</Layout>

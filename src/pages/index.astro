@@ -6,6 +6,7 @@ export const prerender = true;
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import TopRated from '../components/TopRated.astro';
+import SeeItInSentry from '../components/SeeItInSentry.astro';
 import { PRODUCTS } from '../lib/data';
 ---
 
@@ -30,4 +31,6 @@ import { PRODUCTS } from '../lib/data';
       </TopRated>
     </aside>
   </section>
+
+  <SeeItInSentry />
 </Layout>

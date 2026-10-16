@@ -72,6 +72,13 @@ Things to try:
 - Visit `/broken` to see an error thrown during SSR render.
 - Visit `/about`. No server span at all, only a browser `pageload`.
 
+## Where to look in Sentry
+
+The bottom of the home page has a 1-2-3 guide (Traces, Issues, the Next.js Overview dashboard) with direct links
+into your own project. The links are built at **build time** from `SENTRY_ORG` and the project id at the end of
+`PUBLIC_SENTRY_DSN`, so nothing org-specific is hardcoded. Each person's `.env` + `npm run build` gives them links to
+their own org. A small script also links to the current page load's trace.
+
 ## Sentry setup
 
 - [astro.config.mjs](astro.config.mjs): `output: 'server'` + Node adapter + the `sentry()` integration. The integration

@@ -71,3 +71,11 @@ main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
 .modes { width: 100%; border-collapse: collapse; }
 .modes th, .modes td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
 .footer { text-align: center; padding: 24px 16px; color: var(--muted); border-top: 1px solid var(--border); }
+.edition { font-weight: 500; color: var(--muted); }
+.guide { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+.guide > ol { padding-left: 22px; }
+.guide > ol > li { margin-bottom: 20px; }
+.guide h3 { margin: 0 0 4px; }
+.guide ul { padding-left: 18px; }
+.guide li li { margin-bottom: 4px; }
+code { font-size: 0.9em; background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }

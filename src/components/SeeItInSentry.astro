@@ -1,0 +1,76 @@
+---
+// Rendered at BUILD time (it lives on the prerendered home page). Links come
+// from SENTRY_ORG + PUBLIC_SENTRY_DSN in .env, so each person's build points at
+// their own org and project.
+import { sentryLinks as s } from '../lib/sentryLinks';
+---
+
+<section class="guide">
+  <h2>See it in Sentry</h2>
+  {
+    !s.configured && (
+      <p class="notice">
+        Set <code>SENTRY_ORG</code> and <code>PUBLIC_SENTRY_DSN</code> in <code>.env</code> and rebuild, and these become
+        direct links to your project.
+      </p>
+    )
+  }
+  <ol>
+    <li>
+      <h3>Explore → Traces</h3>
+      <p>
+        Click around (open <a href="/products">Products</a> and a product page), then <a href={s.traces} target="_blank" rel="noopener">open Traces</a>.
+        Look for:
+      </p>
+      <ul>
+        <li><code>GET /products</code>: the Astro <strong>SSR</strong> span → <code>http.client</code> call → Flask's
+          <code>products</code> transaction and its N+1 <code>SELECT * FROM reviews</code> spans, all in one trace.</li>
+        <li><code>GET /products/[id]</code>: one parameterized transaction for every product.</li>
+        <li><code>GET /_server-islands/[name]</code>: the "Top rated" box above, rendered on request inside this
+          otherwise static page.</li>
+        <li>No server span for this page or <code>/about</code>. They were rendered at build time.</li>
+      </ul>
+      <p class="muted small">
+        This page's own trace: <a id="this-trace" data-base={s.traceBase} target="_blank" rel="noopener">waiting for Sentry…</a>
+      </p>
+    </li>
+    <li>
+      <h3>Issues</h3>
+      <p>
+        Visit <a href="/broken">/broken</a> (an error during SSR) and check out 9+ Plant Strollers (Flask is out of
+        stock), then <a href={s.issues} target="_blank" rel="noopener">open Issues</a>. Each issue links to the trace
+        it happened in. The checkout one runs from the browser click through Astro into Flask.
+      </p>
+    </li>
+    <li>
+      <h3>Dashboards → Next.js Overview</h3>
+      <p>
+        <a href={s.nextjsDashboard} target="_blank" rel="noopener">Open the prebuilt Next.js Overview dashboard</a> and
+        filter it to this project. It's built for Next.js, but Astro's SSR emits the same kind of spans, so it works
+        here too:
+      </p>
+      <ul>
+        <li><strong>Pageloads</strong>, <strong>Web Vitals</strong>, and <strong>Client Transactions</strong> come from
+          the browser SDK.</li>
+        <li><strong>API Latency</strong> and <strong>Server Transactions</strong> come from Astro's on-request
+          (<code>http.server</code>) renders and <code>/api/checkout</code>.</li>
+        <li><strong>Slow SSR</strong> will stay empty. It only looks for Next.js's own
+          <code>function.nextjs</code> spans. That's expected, not a setup problem.</li>
+      </ul>
+    </li>
+  </ol>
+</section>
+
+<script>
+  // Runs in the browser: fill in this page load's trace id once the SDK has started.
+  import * as Sentry from '@sentry/astro';
+
+  const el = document.getElementById('this-trace') as HTMLAnchorElement | null;
+  const traceId = Sentry.getActiveSpan()?.spanContext().traceId;
+  if (el && traceId) {
+    el.href = `${el.dataset.base}${traceId}/`;
+    el.textContent = traceId.slice(0, 8);
+  } else if (el) {
+    el.textContent = 'not available (Sentry not initialized)';
+  }
+</script>

@@ -1,26 +1,20 @@
 // ON-DEMAND API endpoint, triggered by a user interaction (Checkout click).
-// Errors thrown here are captured by the Sentry middleware and linked to the
-// browser trace that made the fetch.
+// It forwards the order to Flask's POST /checkout. The browser's trace continues
+// here (sentry-trace header) and on into Flask, so one trace covers all three.
 import type { APIRoute } from 'astro';
 import * as Sentry from '@sentry/astro';
-import { decrementInventory, getInventory } from '../../lib/db';
+import { checkout, type CheckoutItem } from '../../lib/api';
 
 export const POST: APIRoute = async ({ request }) => {
-  const { items } = (await request.json()) as { items: { id: number; qty: number }[] };
+  const { items } = (await request.json()) as { items: CheckoutItem[] };
   Sentry.setTag('cart.size', items.length);
 
-  const inventory = await getInventory(items.map((i) => i.id));
-  for (const item of items) {
-    const stock = inventory.find((s) => s.productId === item.id)?.count ?? 0;
-    if (stock < item.qty) {
-      // Thrown (not returned) so Sentry records an unhandled server error.
-      throw new Error(`Not enough inventory for product ${item.id}`);
-    }
+  const result = await checkout(items);
+  if (result.status !== 'success') {
+    // Flask answers 200 with a status, so raise it here to record a server error.
+    const titles = result.status === 'partial' ? result.out_of_stock.join(', ') : 'all items';
+    throw new Error(`Not enough inventory for ${titles}`);
   }
-
-  await Sentry.startSpan({ op: 'function', name: 'checkout.process_order' }, async () => {
-    for (const item of items) await decrementInventory(item.id, item.qty);
-  });
 
   Sentry.logger.info('Order placed', { items: items.length });
   return Response.json({ orderId: crypto.randomUUID().slice(0, 8) });

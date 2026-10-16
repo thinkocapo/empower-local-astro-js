@@ -1,10 +1,10 @@
 ---
 // ON-DEMAND (SSR). No `prerender` export, so with output: 'server' this runs on
 // every request. The Sentry middleware wraps it in an http.server span, and the
-// mocked queries below nest under it.
+// call to Flask below nests under it (and continues into Flask's own spans).
 import Layout from '../../layouts/Layout.astro';
 import ProductCard from '../../components/ProductCard.astro';
-import { getProducts } from '../../lib/db';
+import { getProducts } from '../../lib/api';
 
 const products = await getProducts();
 ---

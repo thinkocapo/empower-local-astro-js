@@ -10,17 +10,18 @@ import Layout from '../layouts/Layout.astro';
   <h1>About us</h1>
   <p>
     Empower Plant is an IoT company building smart devices for plant care. This Astro build mixes rendering
-    strategies so you can see how each one shows up in Sentry:
+    strategies so you can see how each one shows up in Sentry. Data comes from the empower-local Flask
+    backend, called only from the Astro server:
   </p>
   <table class="modes">
     <thead><tr><th>Route</th><th>When HTML is made</th><th>Server span in Sentry?</th></tr></thead>
     <tbody>
-      <tr><td><code>/</code></td><td>Build (+ server island per request)</td><td>Only for <code>/_server-islands/StockLevel</code></td></tr>
+      <tr><td><code>/</code></td><td>Build (+ server island per request)</td><td>Only for <code>/_server-islands/TopRated</code> (calls Flask)</td></tr>
       <tr><td><code>/about</code></td><td>Build</td><td>No</td></tr>
-      <tr><td><code>/products</code></td><td>Every request</td><td>Yes, with mocked DB spans</td></tr>
+      <tr><td><code>/products</code></td><td>Every request</td><td>Yes, continuing into Flask's spans</td></tr>
       <tr><td><code>/products/[id]</code></td><td>Every request</td><td>Yes, parameterized route</td></tr>
       <tr><td><code>/cart</code></td><td>Build shell; cart rendered in browser only</td><td>No (until Checkout)</td></tr>
-      <tr><td><code>POST /api/checkout</code></td><td>Every request (user click)</td><td>Yes, joined to the browser trace</td></tr>
+      <tr><td><code>POST /api/checkout</code></td><td>Every request (user click)</td><td>Yes: browser → Astro → Flask in one trace</td></tr>
       <tr><td><code>/broken</code></td><td>Every request</td><td>Yes, and an error</td></tr>
     </tbody>
   </table>

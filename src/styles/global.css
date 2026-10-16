@@ -53,9 +53,9 @@ main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
 .price { font-weight: 600; }
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
-.stock { list-style: none; padding: 0; margin: 0 0 8px; }
-.stock li.low { color: var(--request-fg); }
-.stock li.out { color: #c0392b; text-decoration: line-through; }
+.ranked { padding-left: 20px; margin: 0 0 8px; }
+.ranked { padding-left: 20px; margin: 0 0 8px; }
+.ranked { padding-left: 20px; margin: 0 0 8px; }
 .product { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .product img { width: 100%; border-radius: 10px; }
 @media (max-width: 720px) { .product { grid-template-columns: 1fr; } }

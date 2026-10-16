@@ -1,0 +1,27 @@
+---
+// SERVER ISLAND. Used with `server:defer`, so the page around it can be fully
+// static (prerendered) while this fragment is fetched from the Astro server
+// after load, via GET /_server-islands/TopRated. That request calls Flask, so
+// it shows up as its own trace: Astro http.server -> Flask /products.
+import { getProducts } from '../lib/api';
+
+const products = await getProducts();
+const ranked = products
+  .map((p) => ({
+    ...p,
+    avg: p.reviews.length ? p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length : 0,
+  }))
+  .sort((a, b) => b.avg - a.avg || b.reviews.length - a.reviews.length);
+---
+
+<ol class="ranked">
+  {
+    ranked.map((p) => (
+      <li>
+        <a href={`/products/${p.id}`}>{p.title}</a>{' '}
+        <span class="muted">{p.avg.toFixed(1)}★ ({p.reviews.length})</span>
+      </li>
+    ))
+  }
+</ol>
+<p class="muted small">Live from Flask, rendered {new Date().toLocaleTimeString()}</p>

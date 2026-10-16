@@ -1,11 +1,11 @@
 ---
 // PRERENDERED at build time. The hero and featured cards are static HTML.
-// The live-inventory box is a server island, fetched per request after load.
+// The "Top rated" box is a server island, fetched per request after load.
 export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import StockLevel from '../components/StockLevel.astro';
+import TopRated from '../components/TopRated.astro';
 import { PRODUCTS } from '../lib/data';
 ---
 
@@ -24,10 +24,10 @@ import { PRODUCTS } from '../lib/data';
       </div>
     </div>
     <aside class="panel">
-      <h2>In stock right now</h2>
-      <StockLevel server:defer>
-        <p slot="fallback" class="muted">Checking inventory…</p>
-      </StockLevel>
+      <h2>Top rated right now</h2>
+      <TopRated server:defer>
+        <p slot="fallback" class="muted">Asking the backend…</p>
+      </TopRated>
     </aside>
   </section>
 </Layout>

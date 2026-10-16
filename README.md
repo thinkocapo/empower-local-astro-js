@@ -1,10 +1,17 @@
 # Empower Plant — Astro edition 🌱
 
-A small Astro version of [empower-local](../empower-local): the same plant shop and mocked "database", built to show
-**when Astro renders HTML** and what each kind of rendering looks like in Sentry (`@sentry/astro`).
+An Astro frontend for [empower-local](../empower-local)'s Flask backend, built to show **when Astro renders HTML**
+and what each kind of rendering looks like in Sentry (`@sentry/astro`).
 
-No backend services. The DB is mocked in [src/lib/db.ts](src/lib/db.ts), and every fake query opens a span named after
-the SQL it stands in for, so the trace waterfall looks real.
+Astro runs its own Node server for SSR. That server, never the browser, calls Flask
+([src/lib/api.ts](src/lib/api.ts)), so a single trace runs through three tiers:
+
+```
+browser pageload / click ──▶ Astro server (http.server) ──▶ Flask (http.server) ──▶ mocked SQL spans
+   @sentry/astro (client)        @sentry/astro (server)          sentry-sdk (Python)
+```
+
+Flask's database is still mocked (that's empower-local's job), so there's no infrastructure to run.
 
 ## When does "SSR" happen?
 
@@ -13,9 +20,9 @@ Astro renders HTML at one of these times. This app uses all of them:
 | When | How you opt in | Example here | Server span in Sentry? |
 |---|---|---|---|
 | **Build time** (`npm run build`) | `export const prerender = true` | `/`, `/about`, `/cart` shell | **No.** It's a static `.html` file by the time anyone visits. Only the browser SDK sees it. |
-| **Request time** (true SSR) | default with `output: 'server'` | `/products`, `/products/[id]`, `/broken` | **Yes:** `http.server GET /products/[id]` with DB child spans, linked to the browser `pageload` |
-| **Request time, part of a page** (server island) | `<Comp server:defer />` | live inventory box on `/` | **Yes:** `http.server GET /_server-islands/[name]` (its own trace, see note) |
-| **User interaction → server** | API route / fetch | Checkout → `POST /api/checkout` | **Yes**, and joined to the browser trace via `sentry-trace`/`baggage` headers |
+| **Request time** (true SSR) | default with `output: 'server'` | `/products`, `/products/[id]`, `/broken` | **Yes:** `http.server GET /products/[id]` → `http.client` → Flask `products`, linked to the browser `pageload` |
+| **Request time, part of a page** (server island) | `<Comp server:defer />` | "Top rated" box on `/` (calls Flask) | **Yes:** `http.server GET /_server-islands/[name]` (its own trace, see note) |
+| **User interaction → server** | API route / fetch | Checkout → `POST /api/checkout` | **Yes:** browser → Astro → Flask `checkout`, one trace via `sentry-trace`/`baggage` headers |
 | **Browser only** (hydration / client render) | `client:load`, `client:visible`, `client:only` | cart badge, Add to cart, the cart itself | No. Browser spans, errors, and replay only |
 
 The colored banner under the nav on every page shows which one you're looking at. Blue means built at build time
@@ -36,20 +43,32 @@ UI client-side, and API routes for mutations.
 
 ## Run
 
+First start empower-local's Flask backend on :8080 (its React app isn't needed):
+
+```bash
+cd ../empower-local && docker compose up -d --build flask
+```
+
+Then this app:
+
 ```bash
 npm install
 cp .env.template .env   # add your Astro project's DSN to PUBLIC_SENTRY_DSN and SENTRY_DSN
 npm run build && npm start
 ```
 
+`BACKEND_URL` in `.env` points the Astro server at Flask (default `http://localhost:8080`). For traces to join
+across the two projects, Flask's `FLASK_DSN` must be in the same Sentry org.
+
 Open http://localhost:4321. `npm run dev` also works, but in dev mode *every* page renders on request, so use
 build + start to see the real build-time vs. request-time split.
 
 Things to try:
 
-- Reload `/products` a few times and look at **Traces**: `GET /products` with an N+1 of `SELECT * FROM reviews` spans.
-- Add 4+ of one product to the cart and check out. You'll get `Not enough inventory for product N` on the server,
-  in the same trace as the browser click.
+- Reload `/products` and open the trace: Astro `GET /products` → `GET http://localhost:8080/products` → Flask's
+  N+1 of `SELECT * FROM reviews` spans.
+- Add 9+ Plant Strollers (Flask stocks 8) and check out. Flask answers "failed" and the Astro endpoint raises
+  `Not enough inventory for all items`, all in the trace that started with the browser click.
 - Visit `/broken` to see an error thrown during SSR render.
 - Visit `/about`. No server span at all, only a browser `pageload`.
 

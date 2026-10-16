@@ -3,7 +3,7 @@
 // (GET /products/[id]) so all products group into one transaction.
 import Layout from '../../layouts/Layout.astro';
 import AddToCart from '../../components/AddToCart.tsx';
-import { getProduct } from '../../lib/db';
+import { getProduct } from '../../lib/api';
 
 const product = await getProduct(Number(Astro.params.id));
 if (!product) return new Response('Not found', { status: 404 });

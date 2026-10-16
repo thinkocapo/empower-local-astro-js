@@ -1,7 +1,7 @@
 // CLIENT-ONLY ISLAND (client:only="react"). Never rendered on the server or at
 // build time — the cart lives in localStorage, which only exists in the browser.
-// Checkout is a user interaction that calls the /api/checkout SSR endpoint; the
-// browser SDK adds sentry-trace/baggage headers so the server span joins the trace.
+// Checkout is a user interaction that calls the /api/checkout SSR endpoint, which
+// calls Flask. Trace headers flow browser -> Astro -> Flask, so it's one trace.
 import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/astro';
 import { onCartChange, readCart, writeCart, type CartItem } from '../lib/cart';
@@ -27,7 +27,7 @@ export default function Cart() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items.map(({ id, qty }) => ({ id, qty })) }),
+        body: JSON.stringify({ items: items.map(({ id, title, price, qty }) => ({ id, title, price, qty })) }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `Checkout failed: ${res.status}`);
@@ -63,7 +63,7 @@ export default function Cart() {
         {status === 'busy' ? 'Placing order…' : 'Checkout'}
       </button>
       {status === 'error' && <p className="notice err">{message}</p>}
-      <p className="muted small">Each product has 3 in stock. Order 4+ of one item to trigger a server error.</p>
+      <p className="muted small">Flask stocks only 8 Plant Strollers. Order 9+ to trigger a server error.</p>
     </div>
   );
 }

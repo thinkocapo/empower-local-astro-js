@@ -1,6 +1,6 @@
 # Empower Plant — Astro edition 🌱
 
-An Astro frontend for [empower-local](../empower-local)'s Flask backend, built to show **when Astro renders HTML**
+An Astro frontend for [empower-local](https://github.com/thinkocapo/empower_local)'s Flask backend, built to show **when Astro renders HTML**
 and what each kind of rendering looks like in Sentry (`@sentry/astro`).
 
 Astro runs its own Node server for SSR. That server, never the browser, calls Flask
@@ -46,7 +46,9 @@ UI client-side, and API routes for mutations.
 First start empower-local's Flask backend on :8080 (its React app isn't needed):
 
 ```bash
-cd ../empower-local && docker compose up -d --build flask
+git clone git@github.com:thinkocapo/empower_local.git empower-local
+cd empower-local && cp .env.template .env   # set FLASK_DSN (same Sentry org as this app)
+docker compose up -d --build flask
 ```
 
 Then this app:
